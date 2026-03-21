@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trompa — Registre de Pràctica</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  :root {
+    --bg: #faf8f3;
+    --surface: #fff;
+    --surface2: #f5f1e8;
+    --border: #e2d9c8;
+    --text: #2c2416;
+    --text2: #7a6e5e;
+    --text3: #b0a494;
+    --accent: #8b4513;
+    --accent2: #c17f3a;
+    --accent-light: #f5ede0;
+    --green: #3a6b35;
+    --green-light: #e8f0e7;
+    --red: #8b2020;
+    --red-light: #f5e8e8;
+    --amber: #7a5c1e;
+    --amber-light: #f7f0de;
+    --shadow: 0 2px 12px rgba(44,36,22,0.08);
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Lato', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at 20% 0%, rgba(193,127,58,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 100%, rgba(139,69,19,0.04) 0%, transparent 60%);
+  }
+
+  header {
+    background: var(--text);
+    color: var(--bg);
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    border-bottom: 3px solid var(--accent2);
+  }
+
+  header .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+    line-height: 1;
+  }
+
+  header .logo span {
+    display: block;
+    font-family: 'Lato', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 300;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-top: 3px;
+  }
+
+  header .date-display {
+    margin-left: auto;
+    text-align: right;
+    font-size: 0.85rem;
+    color: rgba(250,248,243,0.6);
+    font-weight: 300;
+    letter-spacing: 0.5px;
+  }
+
+  nav {
+    display: flex;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    gap: 0;
+  }
+
+  nav button {
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    padding: 1rem 1.5rem;
+    font-family: 'Lato', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: -1px;
+  }
+
+  nav button.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  nav button:hover:not(.active) {
+    color: var(--text);
+    background: var(--surface2);
+  }
+
+  main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+  }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ── FORMULARI ─────────────────────────── */
+  .form-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 2rem;
+    box-shadow: var(--shadow);
+  }
+
+  .form-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .form-row.full { grid-template-columns: 1fr; }
+
+  label.field-label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--text2);
+    margin-bottom: 0.5rem;
+  }
+
+  input[type="date"],
+  input[type="text"],
+  select {
+    width: 100%;
+    padding: 0.6rem 0.875rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-family: 'Lato', sans-serif;
+    font-size: 0.9rem;
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  input:focus, select:focus {
+    border-color: var(--accent2);
+    background: var(--surface);
+  }
+
+  /* activitat row */
+  .act-section {
+    margin: 1.5rem 0;
+    padding: 1.25rem 1.5rem;
+    background: var(--surface2);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+  }
+
+  .act-section h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .act-icon {
+    width: 22px;
+    height: 22px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: white;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .act-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .act-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .act-item .act-name {
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    color: var(--text2);
+    text-transform: uppercase;
+  }
+
+  .act-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  /* toggle switch */
+  .toggle-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .toggle {
+    position: relative;
+    width: 36px;
+    height: 20px;
+  }
+
+  .toggle input { display: none; }
+
+  .toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: var(--border);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .toggle-slider::before {
+    content: '';
+    position: absolute;
+    left: 3px;
+    top: 3px;
+    width: 14px;
+    height: 14px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+
+  .toggle input:checked + .toggle-slider { background: var(--accent2); }
+  .toggle input:checked + .toggle-slider::before { transform: translateX(16px); }
+
+  .toggle-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text3);
+    min-width: 18px;
+  }
+
+  .dur-input {
+    flex: 1;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.88rem;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Lato', monospace;
+    width: 90px;
+  }
+
+  .dur-input:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .dur-input:focus { border-color: var(--accent2); outline: none; }
+
+  .fresc-row {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .fresc-btn {
+    padding: 0.45rem 1.1rem;
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: none;
+    font-family: 'Lato', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    transition: all 0.18s;
+    color: var(--text2);
+  }
+
+  .fresc-btn[data-val="fresc"].sel { background: var(--green-light); border-color: var(--green); color: var(--green); }
+  .fresc-btn[data-val="tocat"].sel { background: var(--amber-light); border-color: var(--amber); color: var(--amber); }
+  .fresc-btn[data-val="cansat"].sel { background: var(--red-light); border-color: var(--red); color: var(--red); }
+
+  .btn-primary {
+    display: block;
+    width: 100%;
+    margin-top: 1.5rem;
+    padding: 0.85rem;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+  }
+
+  .btn-primary:hover { background: #7a3b10; }
+  .btn-primary:active { transform: scale(0.99); }
+
+  .toast {
+    display: none;
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--text);
+    color: var(--bg);
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    border-left: 4px solid var(--accent2);
+    z-index: 999;
+    animation: slideUp 0.3s ease;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── GRÀFIQUES ─────────────────────────── */
+  .stats-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .stats-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 500;
+  }
+
+  .month-selector {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .month-selector select {
+    width: auto;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+  }
+
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .metric-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    box-shadow: var(--shadow);
+  }
+
+  .metric-card .m-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 0.4rem;
+  }
+
+  .metric-card .m-val {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.1;
+  }
+
+  .metric-card .m-sub {
+    font-size: 0.78rem;
+    color: var(--text2);
+    margin-top: 0.25rem;
+  }
+
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    margin-bottom: 1.25rem;
+  }
+
+  .chart-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 0.75rem;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.78rem;
+    color: var(--text2);
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  /* ── HISTORIAL ─────────────────────────── */
+  .hist-filters {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .hist-filters select { width: auto; font-size: 0.85rem; padding: 0.5rem 0.75rem; }
+
+  .hist-table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+  }
+
+  thead th {
+    background: var(--surface2);
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--text2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--surface2); }
+
+  tbody td {
+    padding: 0.75rem 1rem;
+    color: var(--text);
+    vertical-align: middle;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+
+  .badge-fresc { background: var(--green-light); color: var(--green); }
+  .badge-tocat { background: var(--amber-light); color: var(--amber); }
+  .badge-cansat { background: var(--red-light); color: var(--red); }
+
+  .act-dots {
+    display: flex;
+    gap: 3px;
+    flex-wrap: wrap;
+  }
+
+  .act-dot {
+    width: 22px;
+    height: 22px;
+    border-radius: 4px;
+    background: var(--accent-light);
+    color: var(--accent);
+    font-size: 9px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
+
+  .act-dot.off {
+    background: var(--surface2);
+    color: var(--text3);
+    opacity: 0.5;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text3);
+    font-style: italic;
+  }
+
+  .empty-state p:first-child {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    color: var(--text2);
+  }
+
+  @media (max-width: 600px) {
+    header { padding: 1rem 1.25rem; }
+    nav { padding: 0 0.5rem; }
+    nav button { padding: 0.875rem 0.75rem; font-size: 0.78rem; }
+    main { padding: 1.25rem 1rem; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">
+      ♩ Trompa
+      <span>Registre de Pràctica 2026</span>
+    </div>
+  </div>
+  <div class="date-display" id="headerDate"></div>
+</header>
+
+<nav>
+  <button class="active" onclick="showPage('nova')">Nova entrada</button>
+  <button onclick="showPage('grafiques')">Gràfiques</button>
+  <button onclick="showPage('historial')">Historial</button>
+</nav>
+
+<main>
+
+  <!-- ── NOVA ENTRADA ───────────────────── -->
+  <div id="page-nova" class="page active">
+    <div class="form-card">
+      <div class="form-title">Registre del dia</div>
+
+      <div class="form-row">
+        <div>
+          <label class="field-label">Data</label>
+          <input type="date" id="f-data">
+        </div>
+        <div>
+          <label class="field-label">Estat físic</label>
+          <div class="fresc-row" id="fresc-row">
+            <button class="fresc-btn sel" data-val="fresc" onclick="selFresc(this)">Fresc</button>
+            <button class="fresc-btn" data-val="tocat" onclick="selFresc(this)">Tocat</button>
+            <button class="fresc-btn" data-val="cansat" onclick="selFresc(this)">Cansat</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="act-section">
+        <h3><span class="act-icon">W</span> Warm-up</h3>
+        <div class="act-grid">
+          <div class="act-item" id="act-warmup-curt">
+            <div class="act-name">Warm-up curt</div>
+            <div class="act-controls">
+              <label class="toggle-wrap">
+                <span class="toggle">
+                  <input type="checkbox" id="chk-warmup-curt" onchange="toggleDur(this,'dur-warmup-curt')">
+                  <span class="toggle-slider"></span>
+                </span>
+                <span class="toggle-label" id="lbl-warmup-curt">No</span>
+              </label>
+              <input class="dur-input" type="text" id="dur-warmup-curt" placeholder="hh:mm" disabled>
+            </div>
+          </div>
+          <div class="act-item">
+            <div class="act-name">Warm-up rutines</div>
+            <div class="act-controls">
+              <label class="toggle-wrap">
+                <span class="toggle">
+                  <input type="checkbox" id="chk-warmup-rut" onchange="toggleDur(this,'dur-warmup-rut')">
+                  <span class="toggle-slider"></span>
+                </span>
+                <span class="toggle-label" id="lbl-warmup-rut">No</span>
+              </label>
+              <input class="dur-input" type="text" id="dur-warmup-rut" placeholder="hh:mm" disabled>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="act-section">
+        <h3><span class="act-icon">E</span> Estudi i repertori</h3>
+        <div class="act-grid">
+          <div class="act-item">
+            <div class="act-name">Estudis</div>
+            <div class="act-controls">
+              <label class="toggle-wrap">
+                <span class="toggle">
+                  <input type="checkbox" id="chk-estudis" onchange="toggleDur(this,'dur-estudis')">
+                  <span class="toggle-slider"></span>
+                </span>
+                <span class="toggle-label" id="lbl-estudis">No</span>
+              </label>
+              <input class="dur-input" type="text" id="dur-estudis" placeholder="hh:mm" disabled>
+            </div>
+          </div>
+          <div class="act-item">
+            <div class="act-name">Repertori</div>
+            <div class="act-controls">
+              <label class="toggle-wrap">
+                <span class="toggle">
+                  <input type="checkbox" id="chk-repertori" onchange="toggleDur(this,'dur-repertori')">
+                  <span class="toggle-slider"></span>
+                </span>
+                <span class="toggle-label" id="lbl-repertori">No</span>
+              </label>
+              <input class="dur-input" type="text" id="dur-repertori" placeholder="hh:mm" disabled>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="act-section">
+        <h3><span class="act-icon">Q</span> Conjunt i concerts</h3>
+        <div class="act-grid">
+          <div class="act-item">
+            <div class="act-name">Quintet</div>
+            <div class="act-controls">
+              <label class="toggle-wrap">
+                <span class="toggle">
+                  <input type="checkbox" id="chk-quintet" onchange="toggleDur(this,'dur-quintet')">
+                  <span class="toggle-slider"></span>
+                </span>
+                <span class="toggle-label" id="lbl-quintet">No</span>
+              </label>
+              <input class="dur-input" type="text" id="dur-quintet" placeholder="hh:mm" disabled>
+            </div>
+          </div>
+          <div class="act-item">
+            <div class="act-name">Assaig / Concert</div>
+            <div class="act-controls">
+              <label class="toggle-wrap">
+                <span class="toggle">
+                  <input type="checkbox" id="chk-assaig" onchange="toggleDur(this,'dur-assaig')">
+                  <span class="toggle-slider"></span>
+                </span>
+                <span class="toggle-label" id="lbl-assaig">No</span>
+              </label>
+              <input class="dur-input" type="text" id="dur-assaig" placeholder="hh:mm" disabled>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div>
+          <label class="field-label">Temps total</label>
+          <input type="text" id="f-total" placeholder="hh:mm:ss">
+        </div>
+        <div>
+          <label class="field-label">Notes (opcional)</label>
+          <input type="text" id="f-notes" placeholder="Peces treballades, observacions...">
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="saveEntry()">Guardar entrada</button>
+    </div>
+  </div>
+
+  <!-- ── GRÀFIQUES ──────────────────────── -->
+  <div id="page-grafiques" class="page">
+    <div class="stats-header">
+      <div class="stats-title">Estadístiques</div>
+      <div class="month-selector">
+        <label class="field-label" style="margin:0; white-space:nowrap">Mes:</label>
+        <select id="sel-mes" onchange="renderCharts()"></select>
+      </div>
+    </div>
+
+    <div class="metrics-grid" id="metrics-grid"></div>
+
+    <div class="chart-card">
+      <h3>Temps total diari (hores)</h3>
+      <div style="position:relative; height:220px;"><canvas id="chart-linia"></canvas></div>
+    </div>
+
+    <div class="chart-card">
+      <h3>Distribució per categoria</h3>
+      <div class="legend" id="legend-barres"></div>
+      <div style="position:relative; height:240px;"><canvas id="chart-barres"></canvas></div>
+    </div>
+
+    <div class="chart-card">
+      <h3>Acumulat mensual per categoria (hores)</h3>
+      <div class="legend" id="legend-acumulat"></div>
+      <div style="position:relative; height:260px;"><canvas id="chart-acumulat"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ── HISTORIAL ──────────────────────── -->
+  <div id="page-historial" class="page">
+    <div class="hist-filters">
+      <label class="field-label" style="margin:0">Filtrar per mes:</label>
+      <select id="hist-mes" onchange="renderHistorial()"></select>
+    </div>
+    <div class="hist-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Activitats</th>
+            <th>Temps total</th>
+            <th>Estat</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody id="hist-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'trompa_2026_dades';
+const MESOS = ['Gener','Febrer','Març','Abril','Maig','Juny','Juliol','Agost','Setembre','Octubre','Novembre','Desembre'];
+const CAT_COLORS = ['#8b4513','#c17f3a','#3a6b35','#1a5276','#6c3483','#c0392b'];
+const CAT_LABELS = ['W. Curt','W. Rutines','Estudis','Repertori','Quintet','Assaig/Concert'];
+const CAT_KEYS   = ['warmupCurt','warmupRut','estudis','repertori','quintet','assaig'];
+
+let charts = {};
+let fresc = 'fresc';
+let sheetCarregat = false;
+const recentmentGuardats = new Set(); // dates guardades en aquesta sessió
+
+/* ── utils ── */
+function getData() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+  catch(e) { return []; }
+}
+function saveData(d) { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
+
+function hhmm2min(s) {
+  if (!s || !s.includes(':')) return 0;
+  const [h,m] = s.split(':').map(Number);
+  return (h||0)*60 + (m||0);
+}
+
+function min2hhmm(m) {
+  if (!m) return '—';
+  const h = Math.floor(m/60);
+  const mm = Math.round(m%60);
+  return h + ':' + String(mm).padStart(2,'0');
+}
+
+function totalMin(entry) {
+  return CAT_KEYS.reduce((s,k) => s + (entry[k]||0), 0);
+}
+
+function getMes(dateStr) { return parseInt(dateStr.split('-')[1]) - 1; }
+
+/* ── nav ── */
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  event.target.classList.add('active');
+  if (id === 'grafiques') { populateMonthSelector('sel-mes'); renderCharts(); }
+  if (id === 'historial') { populateMonthSelector('hist-mes'); renderHistorial(); }
+}
+
+/* ── form controls ── */
+function toggleDur(chk, durId) {
+  const dur = document.getElementById(durId);
+  const lbl = document.getElementById('lbl-' + chk.id.replace('chk-',''));
+  dur.disabled = !chk.checked;
+  lbl.textContent = chk.checked ? 'Sí' : 'No';
+  if (!chk.checked) dur.value = '';
+}
+
+function selFresc(btn) {
+  document.querySelectorAll('.fresc-btn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  fresc = btn.dataset.val;
+}
+
+/* ── Google Sheets ── */
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxgwSAz8eskaL3DqoeHM-OKJy-R0YVWebGpZbdfEKoUUH1PSjicChkkiwJ_GPxQEeI0Pg/exec';
+
+function saveToSheet(entry) {
+  const params = new URLSearchParams({
+    data:       entry.data,
+    warmupCurt: entry.warmupCurt,
+    warmupRut:  entry.warmupRut,
+    estudis:    entry.estudis,
+    repertori:  entry.repertori,
+    quintet:    entry.quintet,
+    assaig:     entry.assaig,
+    total:      entry.total || '',
+    fresc:      entry.fresc,
+    notes:      entry.notes || ''
+  });
+  fetch(APPS_SCRIPT_URL + '?' + params.toString())
+    .then(r => r.json())
+    .then(r => {
+      console.log('Sheet OK:', r);
+      // Confirmat pel Sheet: assegura localStorage amb valors correctes
+      const dades = getData();
+      const idx = dades.findIndex(e => e.data === entry.data);
+      if (idx >= 0) dades[idx] = entry;
+      else dades.push(entry);
+      dades.sort((a,b) => a.data.localeCompare(b.data));
+      saveData(dades);
+    })
+    .catch(err => console.warn('Sheet error:', err));
+}
+
+/* ── save ── */
+function saveEntry() {
+  const data = document.getElementById('f-data').value;
+  if (!data) { showToast('⚠ Cal posar una data!'); return; }
+
+  const entry = {
+    data,
+    fresc,
+    notes: document.getElementById('f-notes').value,
+    total: document.getElementById('f-total').value || '',
+    warmupCurt: document.getElementById('chk-warmup-curt').checked ? hhmm2min(document.getElementById('dur-warmup-curt').value) : 0,
+    warmupRut:  document.getElementById('chk-warmup-rut').checked  ? hhmm2min(document.getElementById('dur-warmup-rut').value)  : 0,
+    estudis:    document.getElementById('chk-estudis').checked     ? hhmm2min(document.getElementById('dur-estudis').value)     : 0,
+    repertori:  document.getElementById('chk-repertori').checked   ? hhmm2min(document.getElementById('dur-repertori').value)   : 0,
+    quintet:    document.getElementById('chk-quintet').checked     ? hhmm2min(document.getElementById('dur-quintet').value)     : 0,
+    assaig:     document.getElementById('chk-assaig').checked      ? hhmm2min(document.getElementById('dur-assaig').value)      : 0,
+  };
+
+  const dades = getData();
+  const idx = dades.findIndex(e => e.data === data);
+  if (idx >= 0) dades[idx] = entry; else dades.push(entry);
+  dades.sort((a,b) => a.data.localeCompare(b.data));
+  saveData(dades);
+  recentmentGuardats.add(entry.data); // protegeix aquesta data
+  saveToSheet(entry);
+  resetForm();
+  showToast('✓ Entrada guardada!');
+}
+
+function resetForm() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('f-data').value = today;
+  document.getElementById('f-notes').value = '';
+  document.getElementById('f-total').value = '';
+  fresc = 'fresc';
+  document.querySelectorAll('.fresc-btn').forEach(b => {
+    b.classList.toggle('sel', b.dataset.val === 'fresc');
+  });
+  ['warmup-curt','warmup-rut','estudis','repertori','quintet','assaig'].forEach(id => {
+    const chk = document.getElementById('chk-'+id);
+    const dur = document.getElementById('dur-'+id);
+    const lbl = document.getElementById('lbl-'+id);
+    if (chk) { chk.checked = false; dur.disabled = true; dur.value = ''; lbl.textContent = 'No'; }
+  });
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none'; }, 2500);
+}
+
+/* ── month selectors ── */
+function populateMonthSelector(selId) {
+  const sel = document.getElementById(selId);
+  const cur = sel.value;
+  sel.innerHTML = '<option value="all">Tots els mesos</option>';
+  MESOS.forEach((m,i) => {
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = m;
+    sel.appendChild(opt);
+  });
+  if (cur) sel.value = cur;
+  else sel.value = new Date().getMonth();
+}
+
+/* ── filter data ── */
+function getFiltered(selId) {
+  const dades = getData();
+  const v = document.getElementById(selId).value;
+  if (v === 'all') return dades;
+  return dades.filter(e => getMes(e.data) === parseInt(v));
+}
+
+/* ── CHARTS ── */
+function destroyChart(id) {
+  if (charts[id]) { charts[id].destroy(); delete charts[id]; }
+}
+
+function renderCharts() {
+  if (!sheetCarregat) {
+    document.getElementById('metrics-grid').innerHTML = '<p style="color:var(--text2);font-style:italic">Carregant dades del Sheet...</p>';
+    setTimeout(renderCharts, 800);
+    return;
+  }
+  const dades = getFiltered('sel-mes');
+  renderMetrics(dades);
+  renderLinia(dades);
+  renderBarres(dades);
+  renderAcumulat();
+}
+
+function renderMetrics(dades) {
+  const grid = document.getElementById('metrics-grid');
+  if (!dades.length) { grid.innerHTML = '<p style="color:var(--text3);font-style:italic">Sense dades</p>'; return; }
+  const dies = dades.length;
+  function entryMin(e) {
+    if (e.total && e.total.trim()) {
+      const p = e.total.split(':');
+      if (p.length >= 2) return parseInt(p[0])*60 + parseInt(p[1]);
+    }
+    return totalMin(e);
+  }
+  const total = dades.reduce((s,e) => s + entryMin(e), 0);
+  const avg = total / dies;
+  const max = Math.max(...dades.map(e => entryMin(e)));
+  const frescC = dades.filter(e => e.fresc === 'fresc').length;
+
+  grid.innerHTML = `
+    <div class="metric-card">
+      <div class="m-label">Dies registrats</div>
+      <div class="m-val">${dies}</div>
+    </div>
+    <div class="metric-card">
+      <div class="m-label">Total acumulat</div>
+      <div class="m-val">${min2hhmm(total)}</div>
+      <div class="m-sub">hores</div>
+    </div>
+    <div class="metric-card">
+      <div class="m-label">Mitjana diària</div>
+      <div class="m-val">${min2hhmm(Math.round(avg))}</div>
+      <div class="m-sub">hores/dia</div>
+    </div>
+    <div class="metric-card">
+      <div class="m-label">Màxim diari</div>
+      <div class="m-val">${min2hhmm(max)}</div>
+      <div class="m-sub">hores</div>
+    </div>
+    <div class="metric-card">
+      <div class="m-label">Dies fresc</div>
+      <div class="m-val">${frescC}</div>
+      <div class="m-sub">de ${dies} dies</div>
+    </div>
+  `;
+}
+
+function renderLinia(dades) {
+  destroyChart('linia');
+  if (!dades.length) return;
+  const labels = dades.map(e => e.data.slice(5));
+  function entryMin2(e) { if (e.total && e.total.trim()) { const p = e.total.split(':'); if (p.length >= 2) return parseInt(p[0])*60 + parseInt(p[1]); } return totalMin(e); }
+  const vals = dades.map(e => (entryMin2(e)/60).toFixed(2));
+  const ctx = document.getElementById('chart-linia').getContext('2d');
+  charts['linia'] = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data: vals,
+        borderColor: '#8b4513',
+        backgroundColor: 'rgba(139,69,19,0.08)',
+        borderWidth: 2,
+        pointRadius: dades.length > 20 ? 2 : 4,
+        pointBackgroundColor: '#8b4513',
+        tension: 0.3,
+        fill: true,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { font: { family: 'Lato', size: 11 }, color: '#7a6e5e', maxRotation: 45, autoSkip: dades.length > 15 } },
+        y: { ticks: { font: { family: 'Lato', size: 11 }, color: '#7a6e5e', callback: v => v+'h' }, beginAtZero: true }
+      }
+    }
+  });
+}
+
+function renderBarres(dades) {
+  destroyChart('barres');
+  if (!dades.length) return;
+  const totals = CAT_KEYS.map(k => (dades.reduce((s,e) => s+(e[k]||0),0)/60).toFixed(2));
+  document.getElementById('legend-barres').innerHTML = CAT_LABELS.map((l,i) =>
+    `<span class="legend-item"><span class="legend-dot" style="background:${CAT_COLORS[i]}"></span>${l}</span>`
+  ).join('');
+  const ctx = document.getElementById('chart-barres').getContext('2d');
+  charts['barres'] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: CAT_LABELS,
+      datasets: [{
+        data: totals,
+        backgroundColor: CAT_COLORS,
+        borderRadius: 4,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { font: { family: 'Lato', size: 11 }, color: '#7a6e5e' } },
+        y: { ticks: { font: { family: 'Lato', size: 11 }, color: '#7a6e5e', callback: v => v+'h' }, beginAtZero: true }
+      }
+    }
+  });
+}
+
+function renderAcumulat() {
+  destroyChart('acumulat');
+  const dades = getData();
+  if (!dades.length) return;
+  const mesosPresents = [...new Set(dades.map(e => getMes(e.data)))].sort((a,b)=>a-b);
+  const labels = mesosPresents.map(m => MESOS[m]);
+  const datasets = CAT_KEYS.map((k,i) => ({
+    label: CAT_LABELS[i],
+    data: mesosPresents.map(m => {
+      const sum = dades.filter(e => getMes(e.data)===m).reduce((s,e)=>s+(e[k]||0),0);
+      return (sum/60).toFixed(2);
+    }),
+    backgroundColor: CAT_COLORS[i],
+    borderRadius: 2,
+    stack: 'stack',
+  }));
+  document.getElementById('legend-acumulat').innerHTML = CAT_LABELS.map((l,i) =>
+    `<span class="legend-item"><span class="legend-dot" style="background:${CAT_COLORS[i]}"></span>${l}</span>`
+  ).join('');
+  const ctx = document.getElementById('chart-acumulat').getContext('2d');
+  charts['acumulat'] = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { stacked: true, ticks: { font: { family: 'Lato', size: 11 }, color: '#7a6e5e' } },
+        y: { stacked: true, ticks: { font: { family: 'Lato', size: 11 }, color: '#7a6e5e', callback: v => v+'h' }, beginAtZero: true }
+      }
+    }
+  });
+}
+
+/* ── HISTORIAL ── */
+function renderHistorial() {
+  const dades = getFiltered('hist-mes').slice().reverse();
+  const tbody = document.getElementById('hist-tbody');
+  if (!dades.length) {
+    tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state"><p>Cap entrada registrada</p><p>Afegeix el primer dia des de «Nova entrada»</p></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = dades.map(e => {
+    const dots = CAT_KEYS.map((k,i) => {
+      const on = e[k] > 0;
+      const abbr = ['WC','WR','Es','Re','Qi','As'][i];
+      return `<span class="act-dot ${on?'':'off'}" title="${CAT_LABELS[i]}${on?' · '+min2hhmm(e[k]):''}">${abbr}</span>`;
+    }).join('');
+    const totalManual = e.total || '';
+    const totalCalc = min2hhmm(totalMin(e));
+    return `<tr>
+      <td style="white-space:nowrap;font-weight:700">${e.data}</td>
+      <td><div class="act-dots">${dots}</div></td>
+      <td style="font-weight:700;color:var(--accent)">${totalManual || totalCalc}</td>
+      <td><span class="badge badge-${e.fresc}">${e.fresc}</span></td>
+      <td style="color:var(--text2);font-size:0.82rem">${e.notes||'—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ── init ── */
+(function init() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('f-data').value = today;
+  document.getElementById('headerDate').textContent = new Date().toLocaleDateString('ca-ES', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+  });
+  carregarDelSheet();
+  document.getElementById('f-data').addEventListener('change', function() {
+    carregarEntradaPerData(this.value);
+  });
+})();
+
+function carregarEntradaPerData(data) {
+  const dades = getData();
+  const entry = dades.find(e => e.data === data);
+  if (!entry) {
+    resetFormSenseData();
+    return;
+  }
+  // Omple l'estat físic
+  fresc = entry.fresc || 'fresc';
+  document.querySelectorAll('.fresc-btn').forEach(b => {
+    b.classList.toggle('sel', b.dataset.val === fresc);
+  });
+  // Omple cada activitat
+  const camps = [
+    { chk: 'warmup-curt', dur: 'dur-warmup-curt', key: 'warmupCurt' },
+    { chk: 'warmup-rut',  dur: 'dur-warmup-rut',  key: 'warmupRut'  },
+    { chk: 'estudis',     dur: 'dur-estudis',      key: 'estudis'    },
+    { chk: 'repertori',   dur: 'dur-repertori',    key: 'repertori'  },
+    { chk: 'quintet',     dur: 'dur-quintet',      key: 'quintet'    },
+    { chk: 'assaig',      dur: 'dur-assaig',       key: 'assaig'     },
+  ];
+  camps.forEach(c => {
+    const chk = document.getElementById('chk-' + c.chk);
+    const dur = document.getElementById(c.dur);
+    const lbl = document.getElementById('lbl-' + c.chk);
+    const min = entry[c.key] || 0;
+    if (min > 0) {
+      chk.checked = true;
+      dur.disabled = false;
+      dur.value = min2hhmm(min);
+      if (lbl) lbl.textContent = 'Sí';
+    } else {
+      chk.checked = false;
+      dur.disabled = true;
+      dur.value = '';
+      if (lbl) lbl.textContent = 'No';
+    }
+  });
+  // Notes i total
+  document.getElementById('f-notes').value = entry.notes || '';
+  document.getElementById('f-total').value = entry.total || '';
+  showToast('📅 Entrada del ' + data + ' carregada');
+}
+
+function resetFormSenseData() {
+  fresc = 'fresc';
+  document.querySelectorAll('.fresc-btn').forEach(b => {
+    b.classList.toggle('sel', b.dataset.val === 'fresc');
+  });
+  ['warmup-curt','warmup-rut','estudis','repertori','quintet','assaig'].forEach(id => {
+    const chk = document.getElementById('chk-'+id);
+    const dur = document.getElementById('dur-'+id);
+    const lbl = document.getElementById('lbl-'+id);
+    if (chk) { chk.checked = false; dur.disabled = true; dur.value = ''; if (lbl) lbl.textContent = 'No'; }
+  });
+  document.getElementById('f-notes').value = '';
+  document.getElementById('f-total').value = '';
+}
+
+function carregarDelSheet() {
+  fetch(APPS_SCRIPT_URL + '?accio=llegir')
+    .then(r => r.json())
+    .then(r => {
+      if (r.status !== 'ok') return;
+
+      // Construeix mapa del Sheet, deduplicant per data (queda la que té més camps)
+      const map = new Map();
+      r.dades.forEach(e => {
+        const clean = {
+          data:       e.data,
+          warmupCurt: e.warmupCurt || 0,
+          warmupRut:  e.warmupRut  || 0,
+          estudis:    e.estudis    || 0,
+          repertori:  e.repertori  || 0,
+          quintet:    e.quintet    || 0,
+          assaig:     e.assaig     || 0,
+          total:      e.total      || '',
+          fresc:      e.fresc      || 'fresc',
+          notes:      e.notes      || ''
+        };
+        if (!map.has(e.data)) {
+          map.set(e.data, clean);
+        } else {
+          const prev = map.get(e.data);
+          const prevScore = CAT_KEYS.filter(k => prev[k] > 0).length;
+          const cleanScore = CAT_KEYS.filter(k => clean[k] > 0).length;
+          if (cleanScore > prevScore ||
+             (clean.total && !prev.total) ||
+             (clean.notes && !prev.notes)) {
+            map.set(e.data, clean);
+          }
+        }
+      });
+
+      // Dates recentment guardades en aquesta sessió: NO sobreescrivim
+      const dadesLocals = getData();
+      dadesLocals.forEach(local => {
+        if (!map.has(local.data)) {
+          // Data local que no és al Sheet: la conservem
+          map.set(local.data, local);
+        } else if (recentmentGuardats.has(local.data)) {
+          // Recentment guardada: la local és la correcta
+          map.set(local.data, local);
+        }
+        // Si no és recent, el Sheet té prioritat (ja està al map)
+      });
+
+      const dades = Array.from(map.values()).sort((a,b) => a.data.localeCompare(b.data));
+      saveData(dades);
+      sheetCarregat = true;
+      console.log('Dades carregades del Sheet:', dades.length, 'entrades');
+      const pagGraf = document.getElementById('page-grafiques');
+      const pagHist = document.getElementById('page-historial');
+      if (pagGraf && pagGraf.classList.contains('active')) {
+        populateMonthSelector('sel-mes'); renderCharts();
+      }
+      if (pagHist && pagHist.classList.contains('active')) {
+        populateMonthSelector('hist-mes'); renderHistorial();
+      }
+    })
+    .catch(err => console.warn('Error carregant Sheet:', err));
+}
+</script>
+</body>
+</html>
