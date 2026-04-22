@@ -755,6 +755,12 @@
     <div class="stats-header">
       <div class="stats-title">Estadístiques</div>
       <div class="month-selector">
+        <label class="field-label" style="margin:0; white-space:nowrap">Any:</label>
+        <select id="sel-any" onchange="renderCharts()" style="width:auto;padding:0.5rem 0.75rem;font-size:0.85rem;">
+          <option value="all">Tots</option>
+          <option value="2025">2025</option>
+          <option value="2026" selected>2026</option>
+        </select>
         <label class="field-label" style="margin:0; white-space:nowrap">Mes:</label>
         <select id="sel-mes" onchange="renderCharts()"></select>
       </div>
@@ -783,7 +789,13 @@
   <!-- ── HISTORIAL ──────────────────────── -->
   <div id="page-historial" class="page">
     <div class="hist-filters">
-      <label class="field-label" style="margin:0">Filtrar per mes:</label>
+      <label class="field-label" style="margin:0">Any:</label>
+      <select id="hist-any" onchange="renderHistorial()" style="width:auto;">
+        <option value="all">Tots</option>
+        <option value="2025">2025</option>
+        <option value="2026" selected>2026</option>
+      </select>
+      <label class="field-label" style="margin:0">Mes:</label>
       <select id="hist-mes" onchange="renderHistorial()"></select>
     </div>
     <div class="hist-table-wrap">
@@ -971,9 +983,18 @@ function populateMonthSelector(selId) {
 /* ── filter data ── */
 function getFiltered(selId) {
   const dades = getData();
-  const v = document.getElementById(selId).value;
-  if (v === 'all') return dades;
-  return dades.filter(e => getMes(e.data) === parseInt(v));
+  const anySelId = selId === 'sel-mes' ? 'sel-any' : 'hist-any';
+  const anyEl = document.getElementById(anySelId);
+  const anyVal = anyEl ? anyEl.value : 'all';
+  const mesVal = document.getElementById(selId).value;
+
+  return dades.filter(e => {
+    const any = e.data.split('-')[0];
+    const mes = getMes(e.data);
+    const anyOk = anyVal === 'all' || any === anyVal;
+    const mesOk = mesVal === 'all' || mes === parseInt(mesVal);
+    return anyOk && mesOk;
+  });
 }
 
 /* ── CHARTS ── */
